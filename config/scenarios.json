@@ -1,0 +1,206 @@
+[
+  {
+    "id": "S01",
+    "name": "Light Rain",
+    "category": "Weather",
+    "transform": "RandomRain",
+    "params": {
+      "slant_range": [-10, 10],
+      "drop_length": 15,
+      "drop_width": 1,
+      "drop_color": [200, 200, 200],
+      "blur_value": 3,
+      "brightness_coefficient": 0.9,
+      "rain_type": "drizzle"
+    },
+    "severity": "low",
+    "pass_threshold": 0.20
+  },
+  {
+    "id": "S02",
+    "name": "Heavy Monsoon Rain",
+    "category": "Weather",
+    "transform": "RandomRain",
+    "params": {
+      "slant_range": [-20, 20],
+      "drop_length": 30,
+      "drop_width": 2,
+      "drop_color": [180, 180, 180],
+      "blur_value": 7,
+      "brightness_coefficient": 0.7,
+      "rain_type": "heavy"
+    },
+    "severity": "high",
+    "pass_threshold": 0.50
+  },
+  {
+    "id": "S03",
+    "name": "Light Fog",
+    "category": "Weather",
+    "transform": "RandomFog",
+    "params": {
+      "fog_coef_range": [0.1, 0.2],
+      "alpha_coef": 0.08
+    },
+    "severity": "low",
+    "pass_threshold": 0.20
+  },
+  {
+    "id": "S04",
+    "name": "Dense Fog",
+    "category": "Weather",
+    "transform": "RandomFog",
+    "params": {
+      "fog_coef_range": [0.6, 0.9],
+      "alpha_coef": 0.15
+    },
+    "severity": "high",
+    "pass_threshold": 0.55
+  },
+  {
+    "id": "S05",
+    "name": "Gaussian Noise Low",
+    "category": "Noise",
+    "transform": "GaussNoise",
+    "params": {
+      "var_limit": [5.0, 20.0],
+      "mean": 0
+    },
+    "severity": "low",
+    "pass_threshold": 0.15
+  },
+  {
+    "id": "S06",
+    "name": "Gaussian Noise High",
+    "category": "Noise",
+    "transform": "GaussNoise",
+    "params": {
+      "var_limit": [80.0, 150.0],
+      "mean": 0
+    },
+    "severity": "high",
+    "pass_threshold": 0.45
+  },
+  {
+    "id": "S07",
+    "name": "Motion Blur Light",
+    "category": "Blur",
+    "transform": "MotionBlur",
+    "params": {
+      "blur_limit": 7
+    },
+    "severity": "low",
+    "pass_threshold": 0.15
+  },
+  {
+    "id": "S08",
+    "name": "Motion Blur Heavy",
+    "category": "Blur",
+    "transform": "MotionBlur",
+    "params": {
+      "blur_limit": 25
+    },
+    "severity": "high",
+    "pass_threshold": 0.40
+  },
+  {
+    "id": "S09",
+    "name": "Brightness Overexposure",
+    "category": "Lighting",
+    "transform": "RandomBrightnessContrast",
+    "params": {
+      "brightness_limit": [0.4, 0.6],
+      "contrast_limit": [0.0, 0.2]
+    },
+    "severity": "medium",
+    "pass_threshold": 0.30
+  },
+  {
+    "id": "S10",
+    "name": "Night Darkness",
+    "category": "Lighting",
+    "transform": "RandomBrightnessContrast",
+    "params": {
+      "brightness_limit": [-0.7, -0.5],
+      "contrast_limit": [-0.3, -0.1]
+    },
+    "severity": "medium",
+    "pass_threshold": 0.35
+  },
+  {
+    "id": "S11",
+    "name": "Random Snow",
+    "category": "Weather",
+    "transform": "RandomSnow",
+    "params": {
+      "snow_point_range": [0.1, 0.3],
+      "brightness_coeff": 2.0
+    },
+    "severity": "medium",
+    "pass_threshold": 0.35
+  },
+  {
+    "id": "S12",
+    "name": "JPEG Compression Artifact",
+    "category": "Compression",
+    "transform": "ImageCompression",
+    "params": {
+      "quality_range": [5, 20],
+      "compression_type": "jpeg"
+    },
+    "severity": "low",
+    "pass_threshold": 0.15
+  },
+  {
+    "id": "S13",
+    "name": "Coarse Dropout / Occlusion",
+    "category": "Occlusion",
+    "transform": "CoarseDropout",
+    "params": {
+      "num_holes_range": [8, 16],
+      "hole_height_range": [16, 32],
+      "hole_width_range": [16, 32],
+      "fill": 0
+    },
+    "severity": "medium",
+    "pass_threshold": 0.30
+  },
+  {
+    "id": "S14",
+    "name": "Lens Distortion",
+    "category": "Geometric",
+    "transform": "OpticalDistortion",
+    "params": {
+      "distort_limit": 0.5,
+      "shift_limit": 0.5
+    },
+    "severity": "medium",
+    "pass_threshold": 0.25
+  },
+  {
+    "id": "S15",
+    "name": "Combined Attack",
+    "category": "Compound",
+    "transform": "Combined",
+    "params": {
+      "rain": {
+        "slant_range": [-15, 15],
+        "drop_length": 20,
+        "drop_width": 1,
+        "drop_color": [190, 190, 190],
+        "blur_value": 5,
+        "brightness_coefficient": 0.8,
+        "rain_type": "heavy"
+      },
+      "noise": {
+        "var_limit": [40.0, 80.0],
+        "mean": 0
+      },
+      "blur": {
+        "blur_limit": 15
+      }
+    },
+    "severity": "high",
+    "pass_threshold": 0.60
+  }
+]
