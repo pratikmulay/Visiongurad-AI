@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VisionGuard Safety Scorecard</title>
+  <style>
+    /* ── Reset & base ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    /* ── Header ───────────────────────────────────────────────────── */
+    .header {
+      background: linear-gradient(135deg, #1a1f2e 0%, #0d1321 60%, #111827 100%);
+      border-bottom: 1px solid #2d3748;
+      padding: 2rem 3rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header-left h1 {
+      font-size: 1.9rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      background: linear-gradient(90deg, #60a5fa, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .header-left p {
+      color: #94a3b8;
+      font-size: 0.85rem;
+      margin-top: 4px;
+    }
+    .header-right {
+      text-align: right;
+    }
+    .header-right .model-tag {
+      display: inline-block;
+      background: #1e3a5f;
+      color: #60a5fa;
+      border: 1px solid #2563eb55;
+      border-radius: 6px;
+      padding: 4px 12px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+    .header-right .timestamp {
+      color: #64748b;
+      font-size: 0.78rem;
+      margin-top: 6px;
+    }
+
+    /* ── Container ────────────────────────────────────────────────── */
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 2rem 3rem 4rem;
+    }
+
+    /* ── Summary bar ──────────────────────────────────────────────── */
+    .summary-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1.2rem;
+      margin: 2rem 0;
+    }
+    .stat-card {
+      background: #1a1f2e;
+      border: 1px solid #2d3748;
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 4px; height: 100%;
+      border-radius: 4px 0 0 4px;
+    }
+    .stat-card.blue::before  { background: #3b82f6; }
+    .stat-card.green::before { background: #22c55e; }
+    .stat-card.red::before   { background: #ef4444; }
+    .stat-card.amber::before { background: #f59e0b; }
+    .stat-card.purple::before{ background: #8b5cf6; }
+    .stat-label {
+      font-size: 0.73rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #64748b;
+      font-weight: 600;
+    }
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin-top: 4px;
+      line-height: 1;
+    }
+    .stat-sub {
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+
+    /* ── Section titles ───────────────────────────────────────────── */
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #e2e8f0;
+      margin: 2.5rem 0 1rem;
+      padding-bottom: 0.6rem;
+      border-bottom: 1px solid #2d3748;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .section-title .pill {
+      font-size: 0.7rem;
+      background: #1e3a5f;
+      color: #60a5fa;
+      border-radius: 99px;
+      padding: 2px 10px;
+    }
+
+    /* ── Results table ────────────────────────────────────────────── */
+    .table-wrapper {
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid #2d3748;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      background: #1a1f2e;
+    }
+    thead tr {
+      background: #111827;
+    }
+    th {
+      padding: 12px 14px;
+      text-align: left;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #64748b;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    tbody tr {
+      border-top: 1px solid #1e293b;
+      transition: background 0.15s;
+    }
+    tbody tr:hover { background: #1e293b; }
+    tbody tr.pass-row { border-left: 3px solid #22c55e; }
+    tbody tr.fail-row { border-left: 3px solid #ef4444; }
+    tbody tr.error-row { border-left: 3px solid #f59e0b; }
+    td {
+      padding: 11px 14px;
+      color: #cbd5e1;
+      vertical-align: middle;
+    }
+    td .id-badge {
+      font-family: 'Courier New', monospace;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #94a3b8;
+    }
+    td .scenario-name {
+      font-weight: 500;
+      color: #e2e8f0;
+    }
+    td .category-tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 99px;
+      background: #1e293b;
+      color: #94a3b8;
+      border: 1px solid #334155;
+    }
+
+    /* Severity badges */
+    .sev-badge {
+      display: inline-block;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 9px;
+      border-radius: 99px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .sev-low    { background: #14532d33; color: #4ade80; border: 1px solid #166534; }
+    .sev-medium { background: #78350f33; color: #fbbf24; border: 1px solid #92400e; }
+    .sev-high   { background: #7f1d1d33; color: #f87171; border: 1px solid #991b1b; }
+
+    /* Score cells */
+    .score-high { color: #4ade80; font-weight: 600; }
+    .score-mid  { color: #fbbf24; font-weight: 600; }
+    .score-low  { color: #f87171; font-weight: 600; }
+
+    /* Drop cell */
+    .drop-ok   { color: #4ade80; font-weight: 600; }
+    .drop-warn { color: #fbbf24; font-weight: 600; }
+    .drop-bad  { color: #f87171; font-weight: 600; }
+
+    /* Status badges */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.73rem;
+      font-weight: 700;
+      padding: 3px 12px;
+      border-radius: 99px;
+      white-space: nowrap;
+    }
+    .status-pass  { background: #14532d55; color: #4ade80; border: 1px solid #166534; }
+    .status-fail  { background: #7f1d1d55; color: #f87171; border: 1px solid #991b1b; }
+    .status-error { background: #78350f55; color: #fbbf24; border: 1px solid #92400e; }
+
+    /* ── Before/After thumbnails ──────────────────────────────────── */
+    .thumbnail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.2rem;
+      margin-bottom: 2rem;
+    }
+    .thumb-card {
+      background: #1a1f2e;
+      border: 1px solid #2d3748;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .thumb-card-header {
+      padding: 10px 16px;
+      background: #111827;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .thumb-card-header span {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #e2e8f0;
+    }
+    .thumb-card-body {
+      padding: 12px 16px 16px;
+    }
+    .thumb-card-body img {
+      width: 100%;
+      border-radius: 8px;
+      object-fit: cover;
+      height: 180px;
+    }
+    .thumb-card-body .no-img {
+      width: 100%;
+      height: 180px;
+      background: #0f1117;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #475569;
+      font-size: 0.8rem;
+    }
+    .thumb-drop {
+      margin-top: 8px;
+      font-size: 0.8rem;
+      color: #94a3b8;
+    }
+    .thumb-drop span {
+      font-weight: 700;
+      color: #f87171;
+    }
+
+    /* ── Failures section ─────────────────────────────────────────── */
+    .failure-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .failure-item {
+      background: #1a1f2e;
+      border: 1px solid #7f1d1d66;
+      border-left: 4px solid #ef4444;
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      display: grid;
+      grid-template-columns: 80px 1fr auto;
+      align-items: center;
+      gap: 1rem;
+    }
+    .failure-item .f-id {
+      font-family: 'Courier New', monospace;
+      font-weight: 700;
+      color: #f87171;
+      font-size: 0.9rem;
+    }
+    .failure-item .f-name {
+      font-weight: 500;
+      color: #e2e8f0;
+    }
+    .failure-item .f-sub {
+      font-size: 0.78rem;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+    .failure-item .f-drop {
+      text-align: right;
+      font-weight: 700;
+      color: #f87171;
+      font-size: 1.1rem;
+    }
+    .failure-item .f-drop-label {
+      font-size: 0.7rem;
+      color: #64748b;
+      text-align: right;
+    }
+    .no-failures {
+      background: #14532d33;
+      border: 1px solid #166534;
+      border-radius: 8px;
+      padding: 1.5rem;
+      text-align: center;
+      color: #4ade80;
+      font-weight: 600;
+    }
+
+    /* ── Category section ─────────────────────────────────────────── */
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .cat-card {
+      background: #1a1f2e;
+      border: 1px solid #2d3748;
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+    }
+    .cat-card h4 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #94a3b8;
+      margin-bottom: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .cat-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      padding: 3px 0;
+      color: #cbd5e1;
+    }
+    .cat-row .cat-status { font-weight: 600; }
+    .cat-row .cat-pass { color: #4ade80; }
+    .cat-row .cat-fail { color: #f87171; }
+
+    /* ── Footer ───────────────────────────────────────────────────── */
+    footer {
+      background: #111827;
+      border-top: 1px solid #1e293b;
+      padding: 1.2rem 3rem;
+      text-align: center;
+      font-size: 0.78rem;
+      color: #475569;
+    }
+    footer a { color: #60a5fa; text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ─────────────────────────────────────────────────────── -->
+<header class="header">
+  <div class="header-left">
+    <h1>⚡ VisionGuard Safety Scorecard</h1>
+    <p>Automated Robustness &amp; Adversarial Testing Suite for Computer Vision Models</p>
+  </div>
+  <div class="header-right">
+    <div class="model-tag">Model: {{ model_name }}</div>
+    <div class="timestamp">Generated: {{ run_timestamp }}</div>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- ── SUMMARY BAR ──────────────────────────────────────────────── -->
+  <div class="summary-bar">
+    <div class="stat-card blue">
+      <div class="stat-label">Total Scenarios</div>
+      <div class="stat-value">{{ stats.total }}</div>
+      <div class="stat-sub">15 adversarial tests</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-label">Passed</div>
+      <div class="stat-value">{{ stats.passed }}</div>
+      <div class="stat-sub">within threshold</div>
+    </div>
+    <div class="stat-card red">
+      <div class="stat-label">Failed</div>
+      <div class="stat-value">{{ stats.failed }}</div>
+      <div class="stat-sub">exceeded threshold</div>
+    </div>
+    <div class="stat-card {% if stats.pass_rate >= 80 %}green{% elif stats.pass_rate >= 50 %}amber{% else %}red{% endif %}">
+      <div class="stat-label">Pass Rate</div>
+      <div class="stat-value">{{ stats.pass_rate }}%</div>
+      <div class="stat-sub">overall robustness</div>
+    </div>
+    <div class="stat-card amber">
+      <div class="stat-label">Avg Drop</div>
+      <div class="stat-value">{{ "%.1f"|format(stats.avg_drop * 100) }}%</div>
+      <div class="stat-sub">confidence degradation</div>
+    </div>
+    {% if stats.worst_scenario %}
+    <div class="stat-card red">
+      <div class="stat-label">Worst Drop</div>
+      <div class="stat-value">{{ "%.1f"|format(stats.worst_scenario.confidence_drop * 100) }}%</div>
+      <div class="stat-sub">{{ stats.worst_scenario.scenario_name }}</div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- ── RESULTS TABLE ────────────────────────────────────────────── -->
+  <div class="section-title">
+    📊 Full Results Table
+    <span class="pill">{{ stats.total }} scenarios</span>
+  </div>
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Scenario</th>
+          <th>Category</th>
+          <th>Severity</th>
+          <th>Baseline Label</th>
+          <th>Baseline Score</th>
+          <th>Stressed Label</th>
+          <th>Stressed Score</th>
+          <th>Drop</th>
+          <th>Threshold</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in results %}
+        <tr class="{% if r.status == 'PASS' %}pass-row{% elif r.status == 'FAIL' %}fail-row{% else %}error-row{% endif %}">
+          <td><span class="id-badge">{{ r.scenario_id }}</span></td>
+          <td><span class="scenario-name">{{ r.scenario_name }}</span></td>
+          <td><span class="category-tag">{{ r.category }}</span></td>
+          <td>
+            <span class="sev-badge sev-{{ r.severity }}">{{ r.severity }}</span>
+          </td>
+          <td>{{ r.baseline_label | truncate(25) }}</td>
+          <td>
+            {% set bs = r.baseline_score * 100 %}
+            <span class="{% if bs >= 80 %}score-high{% elif bs >= 50 %}score-mid{% else %}score-low{% endif %}">
+              {{ "%.1f"|format(bs) }}%
+            </span>
+          </td>
+          <td>{{ r.stressed_label | truncate(25) }}</td>
+          <td>
+            {% set ss = r.stressed_score * 100 %}
+            <span class="{% if ss >= 80 %}score-high{% elif ss >= 50 %}score-mid{% else %}score-low{% endif %}">
+              {{ "%.1f"|format(ss) }}%
+            </span>
+          </td>
+          <td>
+            {% set dp = r.confidence_drop * 100 %}
+            <strong class="{% if dp < 15 %}drop-ok{% elif dp < 35 %}drop-warn{% else %}drop-bad{% endif %}">
+              {{ "%.1f"|format(dp) }}%
+            </strong>
+          </td>
+          <td>{{ "%.0f"|format(r.pass_threshold * 100) }}%</td>
+          <td>
+            {% if r.status == 'PASS' %}
+              <span class="status-badge status-pass">✓ PASS</span>
+            {% elif r.status == 'FAIL' %}
+              <span class="status-badge status-fail">✗ FAIL</span>
+            {% else %}
+              <span class="status-badge status-error">⚠ ERROR</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── TOP FAILURES THUMBNAILS ────────────────────────────────── -->
+  {% if top_failures %}
+  <div class="section-title">
+    🖼 Top Worst Stressed Images
+    <span class="pill">highest confidence drop</span>
+  </div>
+  <div class="thumbnail-grid">
+    {% for r in top_failures %}
+    <div class="thumb-card">
+      <div class="thumb-card-header">
+        <span>{{ r.scenario_id }}: {{ r.scenario_name }}</span>
+        <span class="status-badge {% if r.status == 'PASS' %}status-pass{% else %}status-fail{% endif %}">
+          {{ r.status }}
+        </span>
+      </div>
+      <div class="thumb-card-body">
+        {% if image_data[r.scenario_id] %}
+          <img src="{{ image_data[r.scenario_id] }}" alt="Stressed image for {{ r.scenario_name }}" />
+        {% else %}
+          <div class="no-img">Image not available</div>
+        {% endif %}
+        <div class="thumb-drop">
+          Drop: <span>{{ "%.1f"|format(r.confidence_drop * 100) }}%</span>
+          &nbsp;|&nbsp; {{ r.baseline_label }} → {{ r.stressed_label }}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- ── CATEGORY BREAKDOWN ─────────────────────────────────────── -->
+  <div class="section-title">
+    📂 Results by Category
+  </div>
+  <div class="category-grid">
+    {% for category, cat_results in grouped.items() %}
+    <div class="cat-card">
+      <h4>{{ category }}</h4>
+      {% for r in cat_results %}
+      <div class="cat-row">
+        <span>{{ r.scenario_id }}: {{ r.scenario_name }}</span>
+        <span class="cat-status {% if r.status == 'PASS' %}cat-pass{% elif r.status == 'FAIL' %}cat-fail{% else %}cat-pass{% endif %}">
+          {{ "%.1f"|format(r.confidence_drop * 100) }}%
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- ── ROBUSTNESS FAILURES ────────────────────────────────────── -->
+  <div class="section-title">
+    🚨 Robustness Failures Found
+    {% if failures %}
+      <span class="pill" style="background:#7f1d1d33;color:#f87171;border:1px solid #991b1b;">{{ failures|length }} failure(s)</span>
+    {% else %}
+      <span class="pill" style="background:#14532d33;color:#4ade80;border:1px solid #166534;">All clear</span>
+    {% endif %}
+  </div>
+
+  {% if failures %}
+  <div class="failure-list">
+    {% for r in failures %}
+    <div class="failure-item">
+      <div class="f-id">{{ r.scenario_id }}</div>
+      <div>
+        <div class="f-name">{{ r.scenario_name }}</div>
+        <div class="f-sub">
+          {{ r.category }} · {{ r.severity }} severity ·
+          {{ r.baseline_label }} → {{ r.stressed_label }} ·
+          Baseline {{ "%.1f"|format(r.baseline_score * 100) }}% → Stressed {{ "%.1f"|format(r.stressed_score * 100) }}%
+        </div>
+      </div>
+      <div>
+        <div class="f-drop">{{ "%.1f"|format(r.confidence_drop * 100) }}%</div>
+        <div class="f-drop-label">drop (limit {{ "%.0f"|format(r.pass_threshold * 100) }}%)</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="no-failures">
+    ✓ No robustness failures detected — model passed all 15 adversarial scenarios.
+  </div>
+  {% endif %}
+
+</div><!-- /container -->
+
+<!-- ── FOOTER ──────────────────────────────────────────────────────── -->
+<footer>
+  Generated by <strong>VisionGuard v1.0</strong> &nbsp;|&nbsp;
+  Model: <strong>{{ model_name }}</strong> &nbsp;|&nbsp;
+  Run: {{ run_timestamp }}
+</footer>
+
+</body>
+</html>
